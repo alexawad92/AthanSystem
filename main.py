@@ -171,8 +171,6 @@ class AthanClockApp(App):
         today = datetime.now(TIMEZONE).date()
         if self.last_fetch_date != today:
             self.prayers = get_prayer_times()
-            fake_asr_time = datetime.now(TIMEZONE) + timedelta(seconds=80)
-            self.prayers["Asr"] = fake_asr_time.strftime("%H:%M")
             self.last_fetch_date = today
             self.played_today.clear()  # reset for new day
             logger.info("Prayer times updated for today.")
@@ -203,7 +201,6 @@ class AthanClockApp(App):
             p_time_ampm = p_time_obj.strftime("%I:%M %p")  # "03:30 PM"
 
             self.prayer_labels[i].text = f"{name}\n{p_time_ampm}"    
-            #self.prayer_labels[i].text = f"{name}\n{self.prayers[name]}"
 
         # Play Athan if it's prayer time
         self.play_athan()
@@ -223,17 +220,35 @@ class AthanClockApp(App):
                 self.on = True
                 self.played_today.add(name)  # mark as played
                 logger.info(f"Playing Athan for {name}")
-                self.athan_process = subprocess.Popen(
-                    ["aplay", "-D", "plughw:1,0",athan_file],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
 
+                def try_play():
+                    try:
+                        proc = subprocess.Popen(
+                            ["aplay", "-D", "plughw:1,0", athan_file],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.PIPE
+                        )
+                        return proc
+                    except Exception as e:
+                        logger.warning(f"Athan failed to start: {e}")
+                        return None
+
+                # First attempt
+                self.athan_process = try_play()
+
+                # Retry once if first attempt failed or immediately exited
+                if self.athan_process is None or self.athan_process.poll() is not None:
+                    logger.info("Retrying Athan once...")
+                    self.athan_process = try_play()
+
+                # Schedule reset after 30s
                 def reset_flag(dt):
                     self.on = False
                     self.athan_process = None
                     logger.info("Athan finished")
+
                 Clock.schedule_once(reset_flag, 30)
+                break  # only play one prayer at a time
 
     def handle_touch(self, touch):
         logger.info("Screen touched")
