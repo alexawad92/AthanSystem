@@ -1,9 +1,10 @@
 import logging
 import os
 import subprocess
-from datetime import datetime
-from zoneinfo import ZoneInfo
 import time
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
 import requests
 from kivy.app import App
 from kivy.clock import Clock
@@ -12,30 +13,29 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
+import random
+from kivy.uix.anchorlayout import AnchorLayout
 
 # ---------------------
 # Configuration
 # ---------------------
 LOG_FILE = "/home/alexawad/AthanSystem/AthanSystem/athan.log"
-LAT = 35.947789   # Knoxville lat
-LON = -84.174276  # Knoxville lon
+LAT = 35.947789
+LON = -84.174276
 METHOD = 2
 TIMEZONE = ZoneInfo("America/New_York")
 PRAYERS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
-ATHAN_FILE = "assets/Athan1.wav"
+ATHAN_FILES = ["assets/Athan1.wav", "assets/Athan2.wav"]
 BG_IMAGE = "assets/Background.jpg"
-
-time.sleep(60) # Delay start to allow network to come up
+START_DELAY = 30  # seconds to delay app start
 
 # ---------------------
 # Logger Setup
 # ---------------------
 def get_logger():
     logger = logging.getLogger("athan_app")
-    if not logger.handlers:  # prevent duplicate handlers
+    if not logger.handlers:
         logger.setLevel(logging.INFO)
-
-        # File handler
         fh = logging.FileHandler(LOG_FILE)
         fh.setLevel(logging.INFO)
         fh.setFormatter(logging.Formatter(
@@ -44,7 +44,6 @@ def get_logger():
         ))
         logger.addHandler(fh)
 
-        # Console handler
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
         ch.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
@@ -53,9 +52,8 @@ def get_logger():
 
 logger = get_logger()
 
-
 # ---------------------
-# Fetch Prayer Times
+# Fetch prayer times
 # ---------------------
 def get_prayer_times():
     today_str = datetime.now(TIMEZONE).strftime("%d-%m-%Y")
@@ -72,9 +70,8 @@ def get_prayer_times():
         # fallback times
         return {"Fajr": "05:12", "Dhuhr": "12:15", "Asr": "15:30", "Maghrib": "18:45", "Isha": "20:00"}
 
-
 # ---------------------
-# Next Prayer
+# Next prayer
 # ---------------------
 def next_prayer(prayers):
     now = datetime.now(TIMEZONE)
@@ -87,9 +84,8 @@ def next_prayer(prayers):
             return name, str(delta).split(".")[0]
     return "Fajr", "00:00:00"
 
-
 # ---------------------
-# Custom Root to detect touches
+# Custom Root Layout
 # ---------------------
 class RootLayout(FloatLayout):
     def on_touch_down(self, touch):
@@ -97,7 +93,6 @@ class RootLayout(FloatLayout):
         if hasattr(app, "handle_touch"):
             app.handle_touch(touch)
         return super().on_touch_down(touch)
-
 
 # ---------------------
 # Kivy App
@@ -108,44 +103,65 @@ class AthanClockApp(App):
         self.athan_process = None
         self.prayers = {}
         self.last_fetch_date = None
-
-        # fetch prayer times initially
-        self.fetch_prayer_times_if_needed()
+        self.played_today = set()  # track prayers already played
 
         root = RootLayout()
 
-        # Background fills entire screen
+        # Background
         bg = Image(source=BG_IMAGE, allow_stretch=True, keep_ratio=False)
         bg.size_hint = (1, 1)
-        bg.pos = (0, 0)
         root.add_widget(bg)
 
         # Overlay layout
-        self.overlay = BoxLayout(
-            orientation='vertical', padding=50, spacing=9,
-            size_hint=(1, 1), pos=(0, 0)
-        )
+        self.overlay = BoxLayout(orientation='vertical', padding=50, spacing=9,
+                                 size_hint=(1,1))
         root.add_widget(self.overlay)
 
-        # Next prayer countdown
-        self.next_label = Label(text="", font_size=60, color=(1,1,1,1))
+        # ---------------------
+        # Top row: date (left) and time (right)
+        # ---------------------
+        top_row = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
+
+        self.date_label = Label(text="", font_size=32, color=(1,1,1,1), halign="left")
+        self.time_label = Label(text="", font_size=32, color=(1,1,1,1), halign="right")
+
+        top_row.add_widget(self.date_label)
+        top_row.add_widget(self.time_label)
+
+        self.overlay.add_widget(top_row)
+
+        # Next prayer countdown (middle row)
+        self.next_label = Label(text="", font_size=42, color=(1,1,1,1))
         self.overlay.add_widget(self.next_label)
 
-        # Current date
-        self.date_label = Label(text="", font_size=35, color=(1,1,1,1))
-        self.overlay.add_widget(self.date_label)
+       
 
-        # Prayers row
-        self.prayers_row = GridLayout(cols=6, size_hint_y=0.9, spacing=10)
-        self.overlay.add_widget(self.prayers_row)
+        # ---------------------
+        # Prayer times rows
+        # ---------------------
+
+        # Top row: Fajr, Dhuhr, Asr
+        self.prayer_top_row = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=80)
+        self.overlay.add_widget(self.prayer_top_row)
+
+        # Bottom row: Maghrib, Isha
+        self.prayer_bottom_row = BoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=80)
+        self.overlay.add_widget(self.prayer_bottom_row)
+
+        # Create labels
         self.prayer_labels = []
-        for name in PRAYERS:
-            lbl = Label(text="", font_size=40, color=(1,1,1,1))
-            self.prayers_row.add_widget(lbl)
-            self.prayer_labels.append(lbl)
 
-        # Schedule updates every second
+        for i, name in enumerate(PRAYERS):
+            lbl = Label(text="", font_size=32, color=(1,1,1,1))
+            self.prayer_labels.append(lbl)
+            if i < 3:
+                self.prayer_top_row.add_widget(lbl)
+            else:
+                self.prayer_bottom_row.add_widget(lbl)
+
+        # Schedule update loop
         Clock.schedule_interval(self.update, 1)
+
         return root
 
     # ---------------------
@@ -155,14 +171,21 @@ class AthanClockApp(App):
         today = datetime.now(TIMEZONE).date()
         if self.last_fetch_date != today:
             self.prayers = get_prayer_times()
+            fake_asr_time = datetime.now(TIMEZONE) + timedelta(seconds=80)
+            self.prayers["Asr"] = fake_asr_time.strftime("%H:%M")
             self.last_fetch_date = today
+            self.played_today.clear()  # reset for new day
             logger.info("Prayer times updated for today.")
 
     # ---------------------
-    # Update labels every second
+    # Update every second
     # ---------------------
     def update(self, dt):
-        # Update prayer times if day changed
+        # Update current time
+        now = datetime.now(TIMEZONE)
+        now_time_ampm = now.strftime("%I:%M:%S %p")  # "03:30:45 PM"
+        self.time_label.text = now_time_ampm
+
         self.fetch_prayer_times_if_needed()
 
         # Update countdown
@@ -173,58 +196,70 @@ class AthanClockApp(App):
         now = datetime.now(TIMEZONE)
         self.date_label.text = now.strftime("%a, %d %b %Y")
 
-        # Update prayer times row
+        # Update prayer row
         for i, name in enumerate(PRAYERS):
-            self.prayer_labels[i].text = f"{name}\n{self.prayers[name]}"
+            p_time_24 = self.prayers[name]          # e.g., "15:30"
+            p_time_obj = datetime.strptime(p_time_24, "%H:%M")
+            p_time_ampm = p_time_obj.strftime("%I:%M %p")  # "03:30 PM"
 
-        # Play Athan at exact time
+            self.prayer_labels[i].text = f"{name}\n{p_time_ampm}"    
+            #self.prayer_labels[i].text = f"{name}\n{self.prayers[name]}"
+
+        # Play Athan if it's prayer time
         self.play_athan()
 
     # ---------------------
     # Play Athan
     # ---------------------
     def play_athan(self):
-        now = datetime.now(TIMEZONE).strftime("%H:%M")
+        now_hm = datetime.now(TIMEZONE).strftime("%H:%M")
         for name, time_str in self.prayers.items():
-            if now == time_str and not self.on:
-                logger.info(f"time for prayer")
-                if not os.path.exists(ATHAN_FILE):
-                    logger.error(f"Athan file not found: {ATHAN_FILE}")
+            if now_hm == time_str and name not in self.played_today:
+                athan_file = random.choice(ATHAN_FILES)
+                if not os.path.exists(athan_file):
+                    logger.error(f"Athan file not found: {athan_file}")
                     return
 
                 self.on = True
+                self.played_today.add(name)  # mark as played
                 logger.info(f"Playing Athan for {name}")
                 self.athan_process = subprocess.Popen(
-                    ["aplay", "-D", "plughw:1,0", ATHAN_FILE],
+                    ["aplay", "-D", "plughw:1,0",athan_file],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL
                 )
 
-                # Reset flag after ~30 seconds
                 def reset_flag(dt):
                     self.on = False
                     self.athan_process = None
                     logger.info("Athan finished")
                 Clock.schedule_once(reset_flag, 30)
 
-    # ---------------------
-    # Handle touches
-    # ---------------------
     def handle_touch(self, touch):
         logger.info("Screen touched")
         if self.athan_process:
             logger.info("Stopping Athan due to touch")
-            self.athan_process.terminate()
+            try:
+                self.athan_process.terminate()
+                self.athan_process.wait(timeout=2)  # wait for proper termination
+            except Exception as e:
+                logger.warning(f"Failed to terminate Athan: {e}")
+
             self.athan_process = None
             self.on = False
-
+        else:
+            logger.info("No Athan playing on touch")
 
 # ---------------------
-# Run App
+# Main entry
 # ---------------------
 if __name__ == "__main__":
     from kivy.core.window import Window
     Window.fullscreen = "auto"
+
+    logger.info(f"Delaying app start by {START_DELAY} seconds...")
+    time.sleep(START_DELAY)
+
     logger.info("Starting AthanClockApp")
     AthanClockApp().run()
     logger.info("AthanClockApp exited")
