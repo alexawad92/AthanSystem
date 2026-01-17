@@ -6,5 +6,5 @@ source /home/alexawad/AthanSystem/AthanSystem/venv/bin/activate
 export DISPLAY=:0
 
 # Run your Kivy app
-#/home/alexawad/AthanSystem/AthanSystem/venv/bin/python /home/alexawad/AthanSystem/AthanSystem/main.py
+/home/alexawad/AthanSystem/AthanSystem/venv/bin/python /home/alexawad/AthanSystem/AthanSystem/main.py
 

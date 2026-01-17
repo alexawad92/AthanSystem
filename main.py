@@ -3,7 +3,7 @@ import os
 import subprocess
 from datetime import datetime
 from zoneinfo import ZoneInfo
-
+import time
 import requests
 from kivy.app import App
 from kivy.clock import Clock
@@ -25,6 +25,7 @@ PRAYERS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
 ATHAN_FILE = "assets/Athan1.wav"
 BG_IMAGE = "assets/Background.jpg"
 
+time.sleep(60) # Delay start to allow network to come up
 
 # ---------------------
 # Logger Setup
