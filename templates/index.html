@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Athan</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- Background decoration -->
+    <div class="background-glow glow-one"></div>
+    <div class="background-glow glow-two"></div>
+
+    <!-- TOP -->
+    <header class="top-bar">
+
+        <div class="location">
+            <svg class="location-pin"
+     viewBox="0 0 24 24"
+     aria-hidden="true">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+</svg>
+
+            <div>
+                <div id="city" class="city">
+                    Knoxville
+                </div>
+
+                <div id="state" class="state">
+                    Tennessee
+                </div>
+            </div>
+        </div>
+
+
+        <div class="clock-container">
+
+            <div id="time" class="clock">
+                --:--:--
+            </div>
+
+            <div id="date" class="date">
+                Loading...
+            </div>
+
+        </div>
+
+
+        <div class="weather">
+
+            <div id="weather-icon" class="weather-icon">
+                🌤️
+            </div>
+
+            <div class="weather-main">
+
+                <div class="temperature">
+                    <span id="temperature">--</span>°
+                </div>
+
+                <div id="weather-description" class="weather-description">
+                    Loading weather...
+                </div>
+
+            </div>
+
+            <div class="weather-details">
+
+                <div>
+                    Feels
+                    <strong>
+                        <span id="feels-like">--</span>°
+                    </strong>
+                </div>
+
+                <div>
+                    💧
+                    <strong>
+                        <span id="humidity">--</span>%
+                    </strong>
+                </div>
+
+                <div>
+                    💨
+                    <strong>
+                        <span id="wind">--</span> mph
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+    <main>
+
+        <!-- NEXT PRAYER -->
+        <section class="next-prayer-card">
+
+            <div class="next-label">
+                NEXT PRAYER
+            </div>
+
+            <div id="next-prayer-name" class="next-prayer-name">
+                Loading...
+            </div>
+
+            <div id="countdown" class="countdown">
+                00:00:00
+            </div>
+
+            <div id="next-prayer-time" class="next-prayer-time">
+                --
+            </div>
+
+        </section>
+
+
+        <!-- PRAYER TIMES -->
+        <section class="prayer-section">
+
+            <div class="section-title">
+                <span>Prayer Times</span>
+                <span class="arabic-title">أوقات الصلاة</span>
+            </div>
+
+            <div class="prayer-grid">
+
+                <div class="prayer-card" data-prayer="Fajr">
+                    <div class="prayer-icon">🌅</div>
+
+                    <div class="prayer-name">
+                        Fajr
+                    </div>
+
+                    <div
+                        id="prayer-Fajr"
+                        class="prayer-time"
+                    >
+                        --
+                    </div>
+                </div>
+
+
+                <div class="prayer-card" data-prayer="Dhuhr">
+                    <div class="prayer-icon">☀️</div>
+
+                    <div class="prayer-name">
+                        Dhuhr
+                    </div>
+
+                    <div
+                        id="prayer-Dhuhr"
+                        class="prayer-time"
+                    >
+                        --
+                    </div>
+                </div>
+
+
+                <div class="prayer-card" data-prayer="Asr">
+                    <div class="prayer-icon">🌤️</div>
+
+                    <div class="prayer-name">
+                        Asr
+                    </div>
+
+                    <div
+                        id="prayer-Asr"
+                        class="prayer-time"
+                    >
+                        --
+                    </div>
+                </div>
+
+
+                <div class="prayer-card" data-prayer="Maghrib">
+                    <div class="prayer-icon">🌇</div>
+
+                    <div class="prayer-name">
+                        Maghrib
+                    </div>
+
+                    <div
+                        id="prayer-Maghrib"
+                        class="prayer-time"
+                    >
+                        --
+                    </div>
+                </div>
+
+
+                <div class="prayer-card" data-prayer="Isha">
+                    <div class="prayer-icon">🌙</div>
+
+                    <div class="prayer-name">
+                        Isha
+                    </div>
+
+                    <div
+                        id="prayer-Isha"
+                        class="prayer-time"
+                    >
+                        --
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <div>
+            Athan Clock
+        </div>
+
+        <div>
+            Tap the screen while Athan is playing to stop it
+        </div>
+
+    </footer>
+
+
+    <!-- ATHAN OVERLAY -->
+
+    <div
+        id="athan-overlay"
+        class="athan-overlay hidden"
+    >
+
+        <div class="athan-content">
+
+            <div class="athan-moon">
+                ☪
+            </div>
+
+            <div class="athan-title">
+                Athan
+            </div>
+
+            <div
+                id="athan-prayer"
+                class="athan-prayer"
+            >
+                Prayer Time
+            </div>
+
+            <button
+                id="stop-athan"
+                class="stop-button"
+            >
+                Stop Athan
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script src="/static/app.js"></script>
+
+</div>
+
+</body>
+</html>

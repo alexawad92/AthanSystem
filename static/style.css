@@ -1,0 +1,624 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    color: white;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            #183d52 0%,
+            transparent 40%
+        ),
+        radial-gradient(
+            circle at 85% 90%,
+            #153b35 0%,
+            transparent 40%
+        ),
+        linear-gradient(
+            135deg,
+            #07131d,
+            #0b2028 50%,
+            #071412
+        );
+}
+
+body {
+    position: relative;
+}
+
+.app {
+    position: relative;
+
+    width: 100%;
+    height: 100vh;
+
+    padding: clamp(12px, 2vh, 28px)
+             clamp(18px, 3vw, 42px);
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
+
+.background-glow {
+    position: absolute;
+
+    width: 500px;
+    height: 500px;
+
+    border-radius: 50%;
+
+    filter: blur(100px);
+
+    opacity: 0.16;
+
+    pointer-events: none;
+}
+
+.glow-one {
+    top: -200px;
+    left: -150px;
+
+    background: #27a7c9;
+}
+
+.glow-two {
+    bottom: -250px;
+    right: -150px;
+
+    background: #37a56f;
+}
+
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+
+.top-bar {
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        auto
+        1fr;
+
+    align-items: center;
+
+    gap: clamp(10px, 2vw, 30px);
+
+    flex-shrink: 0;
+
+    z-index: 2;
+}
+
+.location {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.location-icon {
+    font-size: clamp(22px, 2.5vw, 30px);
+}
+
+.location-pin {
+    width: 25px;
+    height: 25px;
+    fill: #ff4d5a;
+    flex-shrink: 0;
+}
+
+.city {
+    font-size: clamp(18px, 2vw, 25px);
+
+    font-weight: 600;
+}
+
+.state {
+    margin-top: 2px;
+
+    font-size: clamp(12px, 1.2vw, 15px);
+
+    opacity: 0.65;
+}
+
+.clock-container {
+    text-align: center;
+}
+
+.clock {
+    font-size: clamp(32px, 4.5vw, 65px);
+
+    font-weight: 300;
+
+    letter-spacing: 2px;
+
+    line-height: 1;
+}
+
+.date {
+    margin-top: 5px;
+
+    font-size: clamp(12px, 1.4vw, 17px);
+
+    opacity: 0.65;
+}
+
+
+/* ============================================================
+   WEATHER
+   ============================================================ */
+
+.weather {
+    justify-self: end;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.weather-icon {
+    font-size: clamp(32px, 3.5vw, 52px);
+}
+
+.temperature {
+    font-size: clamp(27px, 3vw, 38px);
+
+    font-weight: 500;
+
+    line-height: 1;
+}
+
+.weather-description {
+    margin-top: 3px;
+
+    font-size: clamp(11px, 1.1vw, 14px);
+
+    opacity: 0.65;
+}
+
+.weather-details {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+
+    margin-left: 5px;
+
+    font-size: clamp(10px, 1vw, 13px);
+
+    opacity: 0.7;
+}
+
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+
+main {
+    position: relative;
+
+    flex: 1;
+
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+
+    z-index: 2;
+}
+
+
+/* ============================================================
+   NEXT PRAYER
+   ============================================================ */
+
+.next-prayer-card {
+    align-self: center;
+
+    min-width: min(480px, 75vw);
+
+    padding:
+        clamp(12px, 2vh, 22px)
+        clamp(25px, 4vw, 50px);
+
+    border-radius: 22px;
+
+    text-align: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.10),
+            rgba(255,255,255,0.035)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.10);
+
+    box-shadow:
+        0 20px 70px rgba(0,0,0,0.25);
+
+    backdrop-filter: blur(15px);
+
+    flex-shrink: 1;
+}
+
+.next-label {
+    font-size: clamp(10px, 1vw, 13px);
+
+    letter-spacing: 3px;
+
+    opacity: 0.55;
+}
+
+.next-prayer-name {
+    margin-top: 4px;
+
+    font-size: clamp(28px, 4vw, 52px);
+
+    font-weight: 500;
+}
+
+.countdown {
+    margin-top: 2px;
+
+    font-size: clamp(25px, 3vw, 42px);
+
+    font-weight: 300;
+
+    letter-spacing: 2px;
+}
+
+.next-prayer-time {
+    margin-top: 3px;
+
+    font-size: clamp(12px, 1.2vw, 16px);
+
+    opacity: 0.55;
+}
+
+
+/* ============================================================
+   PRAYER SECTION
+   ============================================================ */
+
+.prayer-section {
+    margin-top: clamp(10px, 2vh, 25px);
+
+    flex-shrink: 0;
+}
+
+.section-title {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 8px;
+
+    padding: 0 5px;
+
+    font-size: clamp(12px, 1.4vw, 16px);
+
+    font-weight: 500;
+
+    opacity: 0.75;
+}
+
+.arabic-title {
+    font-size: clamp(14px, 1.7vw, 18px);
+
+    opacity: 0.75;
+}
+
+
+.prayer-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    gap: clamp(7px, 1.2vw, 14px);
+}
+
+
+.prayer-card {
+    position: relative;
+
+    min-height: clamp(85px, 14vh, 135px);
+
+    padding: clamp(8px, 1vh, 18px);
+
+    border-radius: 18px;
+
+    background:
+        rgba(255,255,255,0.055);
+
+    border:
+        1px solid rgba(255,255,255,0.075);
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.prayer-icon {
+    font-size: clamp(18px, 2vw, 27px);
+
+    margin-bottom: 3px;
+
+    opacity: 0.85;
+}
+
+.prayer-name {
+    font-size: clamp(12px, 1.4vw, 16px);
+
+    opacity: 0.65;
+}
+
+.prayer-time {
+    margin-top: 3px;
+
+    font-size: clamp(20px, 2.3vw, 29px);
+
+    font-weight: 500;
+}
+
+
+.prayer-card.active {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(62, 183, 157, 0.28),
+            rgba(37, 130, 148, 0.18)
+        );
+
+    border:
+        1px solid rgba(93, 222, 194, 0.45);
+
+    box-shadow:
+        0 0 35px rgba(55, 190, 166, 0.12);
+
+    transform: translateY(-3px);
+}
+
+.prayer-card.active .prayer-name {
+    color: #8debd5;
+
+    opacity: 1;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+footer {
+    position: relative;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding-top: 6px;
+
+    flex-shrink: 0;
+
+    font-size: clamp(9px, 1vw, 12px);
+
+    opacity: 0.35;
+
+    z-index: 2;
+}
+
+
+/* ============================================================
+   ATHAN OVERLAY
+   ============================================================ */
+
+.athan-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 100;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(25, 90, 84, 0.95),
+            rgba(3, 14, 20, 0.98)
+        );
+
+    backdrop-filter: blur(20px);
+}
+
+.hidden {
+    display: none;
+}
+
+.athan-content {
+    text-align: center;
+
+    animation:
+        athan-pulse 2.5s infinite ease-in-out;
+}
+
+.athan-moon {
+    font-size: clamp(60px, 9vw, 100px);
+
+    margin-bottom: 5px;
+}
+
+.athan-title {
+    font-size: clamp(20px, 3vw, 28px);
+
+    letter-spacing: 6px;
+
+    text-transform: uppercase;
+
+    opacity: 0.65;
+}
+
+.athan-prayer {
+    margin-top: 10px;
+
+    font-size: clamp(40px, 7vw, 65px);
+
+    font-weight: 500;
+}
+
+.stop-button {
+    margin-top: 30px;
+
+    padding: 13px 35px;
+
+    border: none;
+
+    border-radius: 50px;
+
+    background: rgba(255,255,255,0.15);
+
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    border:
+        1px solid rgba(255,255,255,0.2);
+}
+
+.stop-button:active {
+    transform: scale(0.96);
+}
+
+@keyframes athan-pulse {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.035);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* ============================================================
+   SHORT SCREENS
+   ============================================================ */
+
+@media (max-height: 650px) {
+
+    .app {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .next-prayer-card {
+        padding-top: 8px;
+        padding-bottom: 10px;
+    }
+
+    .next-prayer-name {
+        font-size: 32px;
+    }
+
+    .countdown {
+        font-size: 28px;
+    }
+
+    .prayer-section {
+        margin-top: 8px;
+    }
+
+    .prayer-card {
+        min-height: 75px;
+    }
+
+    .prayer-icon {
+        display: none;
+    }
+
+    footer {
+        display: none;
+    }
+}
+
+
+/* ============================================================
+   NARROW SCREENS
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    .top-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .clock-container {
+        order: -1;
+
+        grid-column: span 2;
+    }
+
+    .weather {
+        justify-self: end;
+    }
+
+    .prayer-grid {
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+}
