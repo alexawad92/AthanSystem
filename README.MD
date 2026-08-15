@@ -4,12 +4,12 @@ Athan prayer display system running on a Raspberry Pi.
 
 Running Manually
 
-To run the application manually from the host system:
+To run the application manually from the host system.
 
 1. SSH into the Raspberry Pi
-ssh alexawad@10.0.0.40
+ssh <username>@<raspberry-pi-ip>
 2. Navigate to the application directory
-cd /home/alexawad/AthanSystem/AthanSystem
+cd /path/to/AthanSystem
 3. Activate the Python virtual environment
 source venv/bin/activate
 4. Set the display
@@ -23,19 +23,19 @@ Keep this SSH session running.
 
 Open a new SSH session and repeat steps 1–4:
 
-ssh alexawad@10.0.0.40
-cd /home/alexawad/AthanSystem/AthanSystem
+ssh <username>@<raspberry-pi-ip>
+cd /path/to/AthanSystem
 source venv/bin/activate
 export DISPLAY=:0
 
 Then start Chromium:
 
 chromium --kiosk http://localhost:5000
-7. Access the application from another computer
+7. Access the Application From Another Computer
 
 The frontend can also be accessed from a browser on the local network:
 
-http://10.0.0.40:5000/
+http://<raspberry-pi-ip>:5000/
 Automatic Startup
 
 The application is configured to start automatically when the Raspberry Pi boots.
@@ -63,16 +63,16 @@ sudo systemctl status athan
 View Live Logs
 sudo journalctl -u athan -f
 
-The service runs the backend using the project's virtual environment:
+The service runs the backend using the project's Python virtual environment:
 
-/home/alexawad/AthanSystem/AthanSystem/venv/bin/python
+/path/to/AthanSystem/venv/bin/python
 Frontend / Chromium
 
 Chromium is configured to start automatically when the Raspberry Pi graphical desktop starts.
 
 The autostart configuration is located at:
 
-/home/alexawad/.config/autostart/athan-chromium.desktop
+~/.config/autostart/athan-chromium.desktop
 
 It launches Chromium in kiosk mode and opens:
 
@@ -84,7 +84,7 @@ Application Location
 
 The main application directory is:
 
-/home/alexawad/AthanSystem/AthanSystem
+/path/to/AthanSystem
 
 Important files:
 
@@ -115,7 +115,7 @@ Network Access
 
 From another device on the same network:
 
-http://10.0.0.40:5000/
+http://<raspberry-pi-ip>:5000/
 
 The Raspberry Pi itself uses:
 
