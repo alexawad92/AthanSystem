@@ -41,7 +41,7 @@ ATHAN_FILES = [
 FAJR_ATHAN_FILE = os.path.join(BASE_DIR, "assets", "Fajr.wav")
 
 # Your current audio device
-AUDIO_DEVICE = "plughw:1,0"
+AUDIO_PLAYER = "pw-play"
 
 # Delay before Flask starts
 START_DELAY = 10
@@ -71,7 +71,7 @@ WEATHER_CACHE_SECONDS = 600
 
 TEST_MODE = False
 
-TEST_PRAYER_DELAY = 30
+TEST_PRAYER_DELAY = 60
 
 # We will use a normal Athan for the test.
 # Change to "Fajr" if you specifically want Fajr.wav.
@@ -516,44 +516,197 @@ def get_weather():
 # ============================================================
 
 def try_play_athan(athan_file):
+    global athan_process
 
     try:
-
         if not os.path.exists(athan_file):
-
             logger.error(
-                f"Athan file not found: {athan_file}"
+                f"Athan file does not exist: {athan_file}"
             )
-
             return None
 
+        file_size = os.path.getsize(athan_file)
+
+        logger.info("========================================")
+        logger.info("Starting Athan playback")
+        logger.info(f"File: {athan_file}")
+        logger.info(f"File exists: True")
+        logger.info(f"File size: {file_size} bytes")
+        logger.info(f"Audio player: {AUDIO_PLAYER}")
+
+        # Check whether pw-play exists
+        player_path = subprocess.run(
+            ["which", AUDIO_PLAYER],
+            capture_output=True,
+            text=True,
+        )
+
         logger.info(
-            f"Starting Athan: {athan_file}"
+            f"Player lookup return code: "
+            f"{player_path.returncode}"
+        )
+
+        logger.info(
+            f"Player path: "
+            f"{player_path.stdout.strip()}"
+        )
+
+        if player_path.returncode != 0:
+            logger.error(
+                f"{AUDIO_PLAYER} was not found."
+            )
+            return None
+
+        # Log current PipeWire audio state
+        wpctl_result = subprocess.run(
+            ["wpctl", "status"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+
+        logger.info(
+            "Current PipeWire status:\n"
+            + wpctl_result.stdout
+        )
+
+        if wpctl_result.stderr:
+            logger.warning(
+                "wpctl stderr:\n"
+                + wpctl_result.stderr
+            )
+
+        # Check default sink
+        default_sink = subprocess.run(
+            [
+                "wpctl",
+                "get-volume",
+                "@DEFAULT_AUDIO_SINK@",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+
+        logger.info(
+            f"Default audio sink volume: "
+            f"{default_sink.stdout.strip()}"
+        )
+
+        if default_sink.stderr:
+            logger.warning(
+                f"Default sink stderr: "
+                f"{default_sink.stderr.strip()}"
+            )
+
+        # Start playback
+        logger.info(
+            f"Executing: "
+            f"{AUDIO_PLAYER} {athan_file}"
         )
 
         process = subprocess.Popen(
             [
-                "aplay",
-                "-D",
-                AUDIO_DEVICE,
+                AUDIO_PLAYER,
                 athan_file,
             ],
-
-            stdout=subprocess.DEVNULL,
-
+            stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            text=True,
         )
+
+        logger.info(
+            f"Athan process started. PID={process.pid}"
+        )
+
+        # Give the process a moment to initialize
+        time.sleep(0.5)
+
+        return_code = process.poll()
+
+        if return_code is None:
+            logger.info(
+                f"Athan process is still running. "
+                f"PID={process.pid}"
+            )
+        else:
+            stdout, stderr = process.communicate()
+
+            logger.error(
+                f"Athan process exited immediately."
+            )
+
+            logger.error(
+                f"Return code: {return_code}"
+            )
+
+            logger.error(
+                f"stdout: {stdout}"
+            )
+
+            logger.error(
+                f"stderr: {stderr}"
+            )
+
+            return None
 
         return process
 
-    except Exception as e:
+    except subprocess.TimeoutExpired as e:
 
-        logger.warning(
-            f"Athan failed to start: {e}"
+        logger.error(
+            f"Audio command timed out: {e}"
         )
 
         return None
 
+    except Exception as e:
+
+        logger.exception(
+            f"Unexpected Athan playback error: {e}"
+        )
+
+        return None
+        
+def monitor_athan_process():
+    global athan_process
+
+    while True:
+
+        try:
+            if athan_process is not None:
+
+                return_code = athan_process.poll()
+
+                if return_code is not None:
+
+                    stdout, stderr = athan_process.communicate()
+
+                    logger.info(
+                        f"Athan process finished. "
+                        f"PID={athan_process.pid}, "
+                        f"return code={return_code}"
+                    )
+
+                    if stdout:
+                        logger.info(
+                            f"Athan stdout: {stdout}"
+                        )
+
+                    if stderr:
+                        logger.warning(
+                            f"Athan stderr: {stderr}"
+                        )
+
+                    athan_process = None
+
+        except Exception as e:
+
+            logger.exception(
+                f"Error monitoring Athan process: {e}"
+            )
+
+        time.sleep(1)
 
 def play_athan_file(
     athan_file,
@@ -1017,7 +1170,15 @@ if __name__ == "__main__":
     )
 
     worker.start()
+    
+    monitor_thread = threading.Thread(
+        target=monitor_athan_process,
+        daemon=True,
+    )
 
+    monitor_thread.start()
+    
+    
     logger.info(
         "Starting Athan web server."
     )
