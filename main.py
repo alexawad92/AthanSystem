@@ -34,8 +34,11 @@ PRAYERS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
 
 ATHAN_FILES = [
     os.path.join(BASE_DIR, "assets", "Athan1.wav"),
-    os.path.join(BASE_DIR, "assets", "Athan2.wav"),
     os.path.join(BASE_DIR, "assets", "Athan3.wav"),
+    os.path.join(BASE_DIR, "assets", "BayatKurd.mp3"),
+    os.path.join(BASE_DIR, "assets", "Hijaz.mp3"),
+    os.path.join(BASE_DIR, "assets", "Rust.mp3"),
+    os.path.join(BASE_DIR, "assets", "Seeka.mp3"),
 ]
 
 FAJR_ATHAN_FILE = os.path.join(BASE_DIR, "assets", "Fajr.wav")
